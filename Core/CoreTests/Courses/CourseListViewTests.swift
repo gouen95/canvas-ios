@@ -18,18 +18,19 @@
 
 import TestsFoundation
 import SwiftUI
+import ViewInspector
 @testable import Core
 
 @available(iOS 13.0, *)
 extension CourseListView: CustomErasable {
-    public var erased: ErasedView { ErasedView(self, body: body) }
+    public func erased() throws -> ErasedView {
+        try ErasedView(self, body: body)
+    }
 }
 
 @available(iOS 13.0, *)
 class CourseListViewTests: CoreTestCase {
     lazy var allCourses = environment.subscribe(GetAllCourses())
-    lazy var empty = view.erased.first(EmptyViewRepresentable.self)
-    lazy var searchBar = view.erased.first(SearchBarView.self)
 
     lazy var view: CourseListView = {
         let view = CourseListView(allCourses: allCourses.exhaust()).environment(\.appEnvironment, environment)
@@ -38,6 +39,9 @@ class CourseListViewTests: CoreTestCase {
         window.rootViewController = controller
         return controller.rootView.rootView
     }()
+    lazy var erased = try! view.erased()
+    lazy var empty = erased.first(EmptyViewRepresentable.self)
+    lazy var searchBar = erased.first(SearchBarView.self)
 
     override func setUp() {
         super.setUp()
@@ -56,18 +60,20 @@ class CourseListViewTests: CoreTestCase {
         api.mock(allCourses, value: [])
         XCTAssertEqual(empty?.title, "No Courses")
         XCTAssertEqual(empty?.imageName, "PandaTeacher")
+        XCTAssertNil(searchBar)
     }
 
     func testCoursesListed() throws {
-        dump(view.erased)
-        print(view.erased.unknownTypes)
-        for view in view.erased.findAll(CourseListView.Cell.self) {
-            print("\(view.course.id): \(view.course.name ?? "??")")
-        }
+        let sections = erased.findAll(ViewType.Section.self)
+        XCTAssertEqual(sections.count, 3)
+        let cells = sections.map { $0.findAll(CourseListView.Cell.self) }
+        XCTAssertEqual(cells[0].map { $0.course.id }, ["1", "2", "3"])
+        XCTAssertEqual(cells[1].map { $0.course.id }, ["4", "5", "6"])
+        XCTAssertEqual(cells[2].map { $0.course.id }, ["7"])
     }
 
     func testSearchBar() throws {
-        print(view.erased.first(SearchBarView.self)!)
+        print(searchBar!)
 //        let searchBar = try view.inspect().vStack().view(SearchBarView.self, 0).actualView()
 //        print(try searchBar.uiView())
 //        dump(try view.inspect().vStack()

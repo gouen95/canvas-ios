@@ -20,64 +20,72 @@ import SwiftUI
 @testable import ViewInspector
 
 @available(iOS 13.0, *)
-public enum ErasedView {
-    case unknown(_ view: Any)
-    case container(view: Any, elements: [ErasedView])
+public struct ErasedView {
+    let view: Any
+    let viewType: KnownViewType.Type
+    let subViews: [ErasedView]?
+    var isUnknown: Bool { subViews == nil }
 
-    public init<V: View, Body: View>(_ view: V, body: Body) {
-        self = .container(view: view, elements: [ErasedView(body)])
+    public init(_ view: Any, viewType: KnownViewType.Type = ViewType.ClassifiedView.self, subViews: [ErasedView]?) {
+        self.view = view
+        self.viewType = viewType
+        self.subViews = subViews
     }
 
-    public init(_ view: Any) {
-        self = (view as? CustomErasable)?.erased ?? .unknown(view)
+    public init<V: View, Body: View>(_ view: V, body: Body) throws {
+        self.init(view, subViews: [try ErasedView(body)])
     }
 
-    public init(_ view: Any, _ type: SingleViewContent.Type) {
-        try! self.init(type.child(Content(view)).view)
-    }
-
-    public init(_ view: Any, _ type: MultipleViewContent.Type) {
-        let children = try! type.children(Content(view))
-        self = .container(view: view, elements: children.map { ErasedView($0.view) })
-    }
-
-    public func lazilyFindAll<V: View>(_: V.Type = V.self) -> AnySequence<V> {
-        switch self {
-        case let .unknown(view):
-            return AnySequence([view].lazy.compactMap { $0 as? V })
-        case let .container(view, elements):
-            return AnySequence([
-                [view].lazy.compactMap { $0 as? V },
-                elements.lazy.flatMap { element in
-                    element.lazilyFindAll()
-                },
-            ].joined())
+    public init(_ view: Any) throws {
+        if let view = view as? CustomErasable {
+            self = try view.erased()
+        } else {
+            self.view = view
+            self.viewType = ViewType.ClassifiedView.self
+            self.subViews = nil
         }
     }
 
+    public init<T: SingleViewContent>(_ view: Any, _ viewType: T.Type) throws {
+        try self.init(viewType.child(Content(view)).view)
+    }
+
+    public init<T: KnownViewType>(_ view: Any, _ viewType: T.Type) throws where T: MultipleViewContent {
+        self.view = view
+        self.viewType = viewType
+        self.subViews = try viewType.children(Content(view)).map { try ErasedView($0.view) }
+    }
+
+    public var lazy: AnySequence<ErasedView> {
+        AnySequence<ErasedView>([
+            [self],
+            (subViews ?? []).flatMap { $0.lazy },
+        ].lazy.joined())
+    }
+
     public func findAll<V: View>(_: V.Type = V.self) -> [V] {
-        Array(lazilyFindAll())
+        Array(compactMap { $0.view as? V })
+    }
+
+    public func findAll<V: KnownViewType>(_ type: V.Type) -> [ErasedView] {
+        filter { $0.viewType == type }
     }
 
     public func first<V: View>(_: V.Type = V.self) -> V? {
-        lazilyFindAll().first { _ in true }
+        compactMap { $0.view as? V }.first
     }
 
     public func forEach(_ callback: (ErasedView) -> Void) {
         callback(self)
-        switch self {
-        case let .container(_, elements):
-            for view in elements {
-                view.forEach(callback)
-            }
-        default: ()
+        for view in subViews ?? [] {
+            view.forEach(callback)
         }
     }
 
     public var unknownTypes: Set<String> {
         var types = Set<String>()
         forEach { view in
-            if case let .unknown(view) = view {
+            if view.isUnknown {
                 types.insert("\(type(of: view))")
             }
         }
@@ -86,74 +94,83 @@ public enum ErasedView {
 }
 
 @available(iOS 13.0, *)
+extension ErasedView: Sequence {
+    public typealias Element = ErasedView
+    public typealias Iterator = AnySequence<ErasedView>.Iterator
+
+    public __consuming func makeIterator() -> AnySequence<ErasedView>.Iterator {
+        lazy.makeIterator()
+    }
+}
+
+@available(iOS 13.0, *)
 public protocol CustomErasable {
-    var erased: ErasedView { get }
+    func erased() throws -> ErasedView
 }
 
 @available(iOS 13.0, *)
 extension _ConditionalContent: CustomErasable {
-    public var erased: ErasedView {
-        ErasedView(self, ViewType.ConditionalContent.self)
+    public func erased() throws -> ErasedView {
+        try ErasedView(self, ViewType.ConditionalContent.self)
     }
 }
 
 @available(iOS 13.0, *)
 extension HStack: CustomErasable {
-    public var erased: ErasedView {
-        ErasedView(self, ViewType.HStack.self)
+    public func erased() throws -> ErasedView {
+        try ErasedView(self, ViewType.HStack.self)
     }
 }
 
 @available(iOS 13.0, *)
 extension VStack: CustomErasable {
-    public var erased: ErasedView {
-        ErasedView(self, ViewType.VStack.self)
+    public func erased() throws -> ErasedView {
+        try ErasedView(self, ViewType.VStack.self)
     }
 }
 
 @available(iOS 13.0, *)
 extension ZStack: CustomErasable {
-    public var erased: ErasedView {
-        ErasedView(self, ViewType.ZStack.self)
+    public func erased() throws -> ErasedView {
+        try ErasedView(self, ViewType.ZStack.self)
     }
 }
 
 @available(iOS 13.0, *)
 extension Form: CustomErasable {
-    public var erased: ErasedView {
-        ErasedView(self, ViewType.Form.self)
+    public func erased() throws -> ErasedView {
+        try ErasedView(self, ViewType.Form.self)
     }
 }
 
 @available(iOS 13.0, *)
 extension Section: CustomErasable {
-    public var erased: ErasedView {
-        ErasedView(self, ViewType.Section.self)
+    public func erased() throws -> ErasedView {
+        try ErasedView(self, ViewType.Section.self)
     }
 }
 
 @available(iOS 13.0, *)
 extension ForEach: CustomErasable {
-    public var erased: ErasedView {
+    public func erased() throws -> ErasedView {
         typealias Builder = (Data.Element) -> Content
-        let data = try! Inspector.attribute(label: "data", value: self, type: Data.self)
+        let data = try Inspector.attribute(label: "data", value: self, type: Data.self)
         let builder = try! Inspector.attribute(label: "content", value: self, type: Builder.self)
-        let elements = data.map { ErasedView(builder($0)) }
-        return .container(view: self, elements: elements)
+        return try ErasedView(self, viewType: ViewType.ForEach.self, subViews: data.map { try ErasedView(builder($0)) })
     }
 }
 
 @available(iOS 13.0, *)
 extension ModifiedContent: CustomErasable {
-    public var erased: ErasedView {
-        ErasedView(content)
+    public func erased() throws -> ErasedView {
+        try ErasedView(content)
     }
 }
 
 // fallback
 @available(iOS 13.0, *)
 extension View {
-    var erased: ErasedView {
-        ErasedView(self)
+    public func erased() throws -> ErasedView {
+        try ErasedView(self)
     }
 }
