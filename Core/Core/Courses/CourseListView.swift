@@ -36,8 +36,7 @@ public struct CourseListView: View {
 
     public static func create() -> CourseListView {
         let env = AppEnvironment.shared
-        let allCourses = env.subscribe(GetAllCourses()) {}
-        allCourses.exhaust()
+        let allCourses = env.subscribe(GetAllCourses()).exhaust()
         configureAppearance()
         return CourseListView(allCourses: allCourses)
     }
@@ -115,11 +114,11 @@ public struct CourseListView: View {
         var favoriteButton: some View {
             Button(action: toggleFavorite) {
                 if pending {
-                    Image.icon(.star, .solid).foregroundColor(.named(.ash))
+                    Image.icon(.star, .solid).foregroundColor(.named(.textDark))
                 } else if course.isFavorite {
-                    Image.icon(.star, .solid).foregroundColor(.named(.electric))
+                    Image.icon(.star, .solid).foregroundColor(.named(.textInfo))
                 } else {
-                    Image.icon(.star, .line).foregroundColor(.named(.ash))
+                    Image.icon(.star, .line).foregroundColor(.named(.textDark))
                 }
             }.frame(maxHeight: .infinity, alignment: .top)
             .buttonStyle(PlainButtonStyle())
@@ -137,7 +136,7 @@ public struct CourseListView: View {
                             Text(verbatim: "|")
                         }
                         Text(enrollment!.formattedRole ?? "")
-                    }.foregroundColor(.named(.ash))
+                    }.foregroundColor(.named(.textDark))
                 }
             }
         }
@@ -146,9 +145,9 @@ public struct CourseListView: View {
         var publishedIcon: some View {
             if env.app == .teacher {
                 if course.isPublished {
-                    Image.icon(.complete, .solid).foregroundColor(.named(.shamrock))
+                    Image.icon(.complete, .solid).foregroundColor(.named(.textSuccess))
                 } else {
-                    Image.icon(.no, .solid).foregroundColor(.named(.ash))
+                    Image.icon(.no, .solid).foregroundColor(.named(.textDark))
                 }
             }
         }

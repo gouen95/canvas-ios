@@ -771,6 +771,7 @@
 		DFE1FF2D212F69B3003F27AA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DFE1FF2B212F69B3003F27AA /* Main.storyboard */; };
 		DFE1FF2F212F69B4003F27AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DFE1FF2E212F69B4003F27AA /* Assets.xcassets */; };
 		DFE1FF32212F69B4003F27AA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DFE1FF30212F69B4003F27AA /* LaunchScreen.storyboard */; };
+		E814D54524D7558B0028414E /* CourseListViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E814D54424D7558B0028414E /* CourseListViewTests.swift */; };
 		E81ACB9223D9F469007AFDC1 /* TestsFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B0CEB762150408A00D07CFA /* TestsFoundation.framework */; };
 		E81ACB9323D9F469007AFDC1 /* Core.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C96482E211E2F1A002C3255 /* Core.framework */; };
 		E81ACB9623D9F469007AFDC1 /* fileupload.txt in Resources */ = {isa = PBXBuildFile; fileRef = B12A763721914059000693DE /* fileupload.txt */; };
@@ -1807,6 +1808,7 @@
 		DFE1FF39212F6D20003F27AA /* CoreTester.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CoreTester.entitlements; sourceTree = "<group>"; };
 		E14A7FC270275DE4A9E9263F /* Pods-needs-pspdfkit-CoreTester.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-needs-pspdfkit-CoreTester.debug.xcconfig"; path = "Target Support Files/Pods-needs-pspdfkit-CoreTester/Pods-needs-pspdfkit-CoreTester.debug.xcconfig"; sourceTree = "<group>"; };
 		E29063E525982565056FB9BD /* Pods-PactTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PactTests.debug.xcconfig"; path = "Target Support Files/Pods-PactTests/Pods-PactTests.debug.xcconfig"; sourceTree = "<group>"; };
+		E814D54424D7558B0028414E /* CourseListViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseListViewTests.swift; sourceTree = "<group>"; };
 		E81918FC230349400039616A /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		E81918FF2303495D0039616A /* TestsFoundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TestsFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E81ACA8623D9EA83007AFDC1 /* PactEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PactEncoder.swift; sourceTree = "<group>"; };
@@ -2903,6 +2905,7 @@
 				B19792F8217699B70000369C /* CourseTests.swift */,
 				7D64A97A23676179004EAEDF /* GetCourseSectionsTests.swift */,
 				B1EA5AED212E656100DABC5F /* GetCoursesTest.swift */,
+				E814D54424D7558B0028414E /* CourseListViewTests.swift */,
 			);
 			path = Courses;
 			sourceTree = "<group>";
@@ -4428,6 +4431,7 @@
 				3B300C852277981100743C59 /* RubricTests.swift in Sources */,
 				7DC7047824ABFC1600CD1C46 /* GetFolderTests.swift in Sources */,
 				9FCF1554227CC927009D35F6 /* GradeCircleViewTests.swift in Sources */,
+				E814D54524D7558B0028414E /* CourseListViewTests.swift in Sources */,
 				B1A6BC88218A94FA000515E3 /* APIAssignmentOverrideTests.swift in Sources */,
 				B1F6D6BA22EB675000CDD44D /* SessionDefaultsTests.swift in Sources */,
 				7DBED01D2330332800392F3C /* UploadAvatarTests.swift in Sources */,
